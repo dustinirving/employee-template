@@ -10,13 +10,45 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
-// Array of objects of questions to ask the user
+// Questions for the manager
+const managerQuestions = [
+  {
+    type: "input",
+    name: "name",
+    message: "What is the manager's name?",
+  },
+  {
+    type: "input",
+    name: "id",
+    message: "What is the manager's id number?",
+  },
+  {
+    type: "input",
+    name: "email",
+    message: "What is the manager's email?",
+  },
+  {
+    type: "input",
+    name: "officeNumber",
+    message: "What is the manager's office number?",
+  },
+];
+
+// Continue adding employees question
+const addMoreEmployees = {
+  type: "list",
+  choices: ["Yes", "No"],
+  message: "Do you wish to add more employees?",
+  name: "continue",
+};
+
+// General employee questions
 const employeeQuestions = [
   {
     type: "list",
-    choices: ["Intern", "Engineer", "Manager"],
+    choices: ["Intern", "Engineer"],
     name: "role",
-    message: "What is their role in the company?",
+    message: "What is the employee's role in the company?",
   },
   {
     type: "input",
@@ -31,66 +63,104 @@ const employeeQuestions = [
   {
     type: "input",
     name: "email",
-    message: "What is their email",
+    message: "What is their email?",
   },
 ];
 
+// Question specific to interns
 const internQuestion = {
   type: "input",
   name: "school",
   message: "What school do they attend?",
 };
 
+// Question specific to engineers
 const engineerQuestion = {
   type: "input",
   name: "github",
   message: "What is their github username?",
 };
 
-const managerQuestion = {
-  type: "input",
-  name: "officeNumber",
-  message: "What is their office number?",
-};
+// Array containing all employees
+const employees = [];
 
 //Function Prompts user for information
 async function promptQuestions() {
   try {
-    const employeeAnswers = await inquirer.prompt(employeeQuestions);
-    if (employeeAnswers.role === "Intern") {
-      inquirer.prompt(internQuestion);
+    // Ask questions about the manager
+    const managerAnswers = await inquirer.prompt(managerQuestions);
+    // Create a new object for the manager
+    const theManager = new Manager(
+      managerAnswers.name,
+      managerAnswers.id,
+      managerAnswers.email,
+      managerAnswers.officeNumber
+    );
+    // Push the manager into the array of employees
+    employees.push(theManager);
+
+    // Used to stay in the while loop unti lthe user doesn't want to add anymore employees
+    let continueAddingEmployees = "Yes";
+
+    // Checks to see if the user wishes to add more employees
+    const addMoreEmployeesAnswer = await inquirer.prompt(addMoreEmployees);
+    continueAddingEmployees = addMoreEmployeesAnswer.continue;
+
+    while (continueAddingEmployees === "Yes") {
+      // Asks the the user general employee questions
+      const employeeAnswers = await inquirer.prompt(employeeQuestions);
+
+      //   Asks the user a question specific to interns
+      if (employeeAnswers.role === "Intern") {
+        const internAnswer = await inquirer.prompt(internQuestion);
+        // Creates a new object for the intern added
+        const newIntern = new Intern(
+          employeeAnswers.name,
+          employeeAnswers.id,
+          employeeAnswers.email,
+          internAnswer.school
+        );
+        // Push the intern into the array of employees
+        employees.push(newIntern);
+      }
+
+      //   Asks the user a question specific to engineers
+      if (employeeAnswers.role === "Engineer") {
+        const engineerAnswer = await inquirer.prompt(engineerQuestion);
+        // Creates a new object for the Engineer
+        const newEngineer = new Engineer(
+          employeeAnswers.name,
+          employeeAnswers.id,
+          employeeAnswers.email,
+          engineerAnswer.github
+        );
+
+        // Pushes the engineer into the array of employees
+        employees.push(newEngineer);
+      }
+      // Checks to see if the user wishes to add more employees
+      const addMoreEmployeesAnswer = await inquirer.prompt(addMoreEmployees);
+      continueAddingEmployees = addMoreEmployeesAnswer.continue;
     }
-    if (employeeAnswers.role === "Engineer") {
-      inquirer.prompt(engineerQuestion);
+
+    // When the user is finished entering employees, renders a template for the html
+    const templatedHTML = render(employees);
+
+    // Checks to see if the output folder exists, if it doesn't a new directory is created
+    if (!fs.existsSync(OUTPUT_DIR)) {
+      fs.mkdirSync(OUTPUT_DIR);
     }
-    if (employeeAnswers.role === "Manager") {
-      inquirer.prompt(managerQuestion);
-    }
+
+    // writes the templated html to team.html in the output directory
+    fs.writeFile(outputPath, templatedHTML, function (err) {
+      if (err) {
+        return console.log(err);
+      }
+    });
   } catch (err) {
     console.error(err);
   }
 }
 
+// Calls the function to ask questions to the user to generate an html file
 promptQuestions();
-// Write code to use inquirer to gather information about the development team members,
-// and to create objects for each team member (using the correct classes as blueprints!)
-
-// After the user has input all employees desired, call the `render` function (required
-// above) and pass in an array containing all employee objects; the `render` function will
-// generate and return a block of HTML including templated divs for each employee!
-
-// After you have your html, you're now ready to create an HTML file using the HTML
-// returned from the `render` function. Now write it to a file named `team.html` in the
-// `output` folder. You can use the variable `outputPath` above target this location.
-// Hint: you may need to check if the `output` folder exists and create it if it
-// does not.
-
-// HINT: each employee type (manager, engineer, or intern) has slightly different
-// information; write your code to ask different questions via inquirer depending on
-// employee type.
-
-// HINT: make sure to build out your classes first! Remember that your Manager, Engineer,
-// and Intern classes should all extend from a class named Employee; see the directions
-// for further information. Be sure to test out each class and verify it generates an
-// object with the correct structure and methods. This structure will be crucial in order
-// for the provided `render` function to work! ```
