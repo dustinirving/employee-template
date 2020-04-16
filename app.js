@@ -1,14 +1,16 @@
+// Importing modules
+
 const Manager = require("./lib/Manager");
 const Engineer = require("./lib/Engineer");
 const Intern = require("./lib/Intern");
 const inquirer = require("inquirer");
 const path = require("path");
 const fs = require("fs");
+const render = require("./lib/htmlRenderer");
 
+// Paths for creating a folder and a file
 const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
-
-const render = require("./lib/htmlRenderer");
 
 // Questions for the manager
 const managerQuestions = [
@@ -35,11 +37,11 @@ const managerQuestions = [
 ];
 
 // Continue adding employees question
-const addMoreEmployees = {
+const addMoreEmployeesQuestion = {
   type: "list",
   choices: ["Yes", "No"],
   message: "Do you wish to add more employees?",
-  name: "continue",
+  name: "yesOrNo",
 };
 
 // General employee questions
@@ -84,27 +86,25 @@ const engineerQuestion = {
 // Array containing all employees
 const employees = [];
 
+promptQuestions().then(renderHTML).then(writeHTML);
+
 //Function Prompts user for information
 async function promptQuestions() {
   try {
     // Ask questions about the manager
     const managerAnswers = await inquirer.prompt(managerQuestions);
-    // Create a new object for the manager
-    const theManager = new Manager(
-      managerAnswers.name,
-      managerAnswers.id,
-      managerAnswers.email,
-      managerAnswers.officeNumber
-    );
-    // Push the manager into the array of employees
+    // Destructures the object of user input
+    const { name, id, email, officeNumber } = managerAnswers;
+    // Creates a new object using the class definition
+    const theManager = new Manager(name, id, email, officeNumber);
+    // pushes the manager object into the array of employees
     employees.push(theManager);
 
-    // Used to stay in the while loop unti lthe user doesn't want to add anymore employees
-    let continueAddingEmployees = "Yes";
-
     // Checks to see if the user wishes to add more employees
-    const addMoreEmployeesAnswer = await inquirer.prompt(addMoreEmployees);
-    continueAddingEmployees = addMoreEmployeesAnswer.continue;
+    const addMoreEmployeesAnswer = await inquirer.prompt(
+      addMoreEmployeesQuestion
+    );
+    let continueAddingEmployees = addMoreEmployeesAnswer.yesOrNo;
 
     while (continueAddingEmployees === "Yes") {
       // Asks the the user general employee questions
@@ -139,28 +139,32 @@ async function promptQuestions() {
         employees.push(newEngineer);
       }
       // Checks to see if the user wishes to add more employees
-      const addMoreEmployeesAnswer = await inquirer.prompt(addMoreEmployees);
-      continueAddingEmployees = addMoreEmployeesAnswer.continue;
+      const addMoreEmployeesAnswer = await inquirer.prompt(
+        addMoreEmployeesQuestion
+      );
+      continueAddingEmployees = addMoreEmployeesAnswer.yesOrNo;
     }
-
-    // When the user is finished entering employees, renders a template for the html
-    const templatedHTML = render(employees);
-
-    // Checks to see if the output folder exists, if it doesn't a new directory is created
-    if (!fs.existsSync(OUTPUT_DIR)) {
-      fs.mkdirSync(OUTPUT_DIR);
-    }
-
-    // writes the templated html to team.html in the output directory
-    fs.writeFile(outputPath, templatedHTML, function (err) {
-      if (err) {
-        return console.log(err);
-      }
-    });
   } catch (err) {
     console.error(err);
   }
 }
 
-// Calls the function to ask questions to the user to generate an html file
-promptQuestions();
+// When the user is finished entering employees, renders a template for the html
+function renderHTML() {
+  const templatedHTML = render(employees);
+  return templatedHTML;
+}
+// When the HTML template is created, it is written to an HTML file
+function writeHTML(templatedHTML) {
+  // Checks to see if the output folder exists, if it doesn't a new directory is created
+  if (!fs.existsSync(OUTPUT_DIR)) {
+    fs.mkdirSync(OUTPUT_DIR);
+  }
+
+  // writes the templated html to team.html in the output directory
+  fs.writeFile(outputPath, templatedHTML, function (err) {
+    if (err) {
+      return console.log(err);
+    }
+  });
+}
