@@ -18,6 +18,7 @@ const managerQuestions = [
     type: "input",
     name: "name",
     message: "What is the manager's name?",
+    default: "Name",
   },
   {
     type: "input",
@@ -56,6 +57,7 @@ const employeeQuestions = [
     type: "input",
     name: "name",
     message: "What is their name?",
+    default: "Name",
   },
   {
     type: "input",
