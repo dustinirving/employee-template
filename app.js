@@ -18,22 +18,46 @@ const managerQuestions = [
     type: "input",
     name: "name",
     message: "What is the manager's name?",
-    default: "Name",
+    validate(input) {
+      if (input == false || !isNaN(input)) {
+        input = "";
+        return "You must enter a name";
+      }
+      return true;
+    },
   },
   {
     type: "input",
     name: "id",
     message: "What is the manager's id number?",
+    validate(input) {
+      if (input == false || isNaN(input)) {
+        return "You must enter a number";
+      }
+      return true;
+    },
   },
   {
     type: "input",
     name: "email",
     message: "What is the manager's email?",
+    validate(input) {
+      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input) === false) {
+        return "You must enter a valid email address";
+      }
+      return true;
+    },
   },
   {
     type: "input",
     name: "officeNumber",
     message: "What is the manager's office number?",
+    validate(input) {
+      if (input == false || isNaN(input)) {
+        return "You must enter a number";
+      }
+      return true;
+    },
   },
 ];
 
@@ -57,17 +81,35 @@ const employeeQuestions = [
     type: "input",
     name: "name",
     message: "What is their name?",
-    default: "Name",
+    validate(input) {
+      if (input == false || !isNaN(input)) {
+        input = "";
+        return "You must enter a name";
+      }
+      return true;
+    },
   },
   {
     type: "input",
     name: "id",
     message: "What is their id number?",
+    validate(input) {
+      if (input == false || isNaN(input)) {
+        return "You must enter an id number";
+      }
+      return true;
+    },
   },
   {
     type: "input",
     name: "email",
     message: "What is their email?",
+    validate(input) {
+      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input) === false) {
+        return "You must enter a valid email address";
+      }
+      return true;
+    },
   },
 ];
 
@@ -76,6 +118,12 @@ const internQuestion = {
   type: "input",
   name: "school",
   message: "What school do they attend?",
+  validate(input) {
+    if (input == false) {
+      return "You must enter a school";
+    }
+    return true;
+  },
 };
 
 // Question specific to engineers
@@ -83,6 +131,12 @@ const engineerQuestion = {
   type: "input",
   name: "github",
   message: "What is their github username?",
+  validate(input) {
+    if (input == false) {
+      return "You must enter a github username";
+    }
+    return true;
+  },
 };
 
 // Array containing all employees
@@ -156,6 +210,7 @@ function renderHTML() {
   const templatedHTML = render(employees);
   return templatedHTML;
 }
+
 // When the HTML template is created, it is written to an HTML file
 function writeHTML(templatedHTML) {
   // Checks to see if the output folder exists, if it doesn't a new directory is created

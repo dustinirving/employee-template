@@ -4,7 +4,14 @@ This is a command line interface program that generates a HTML file, with a team
 
 ### Demo
 
-![Gif](gifs-images/employee.gif)
+Part 1
+![Gif-manager](gifs-images/manager.gif)
+
+Part 2
+![Gif-manager](gifs-images/engineer.gif)
+
+Part 3
+![Gif-manager](gifs-images/intern.gif)
 
 ### Example HTML
 
@@ -42,7 +49,7 @@ node app.js
 
 ## Tests
 
-Make sure "jest": "^24.8.0" is installed then enter this command:
+Make sure "jest": "^24.8.0" is installed and then enter this command:
 
 ```sh
 npm test
